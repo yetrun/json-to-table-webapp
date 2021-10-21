@@ -4,10 +4,10 @@
       <el-button @click="generateTableHTML">生成</el-button>
     </el-header>
 
-    <el-main>
+    <el-main class="app-main">
       <!-- 左右分开，一边是 JSON 源代码，一边是表格 -->
-      <el-row :gutter="12">
-        <el-col :span="12">
+      <splitpanes>
+        <pane size="35">
           <el-form ref="sourceForm" :rules="rules" :model="source" label-width="60px" hide-required-asterisk>
             <el-form-item label="Schema" prop="schema">
               <el-input type="textarea" rows="10" v-model="source.schema" @input="clearValidate('schema')" />
@@ -16,17 +16,19 @@
               <el-input type="textarea" rows="20" v-model="source.data" @input="clearValidate('data')" />
             </el-form-item>
           </el-form>
-        </el-col>
-        <el-col :span="12">
+        </pane>
+        <pane>
           <div v-html="tableHTML" v-if="tableHTML"></div>
           <el-empty description="请点击导航栏上的生成按钮生成表格" v-else></el-empty>
-        </el-col>
-      </el-row>
+        </pane>
+      </splitpanes>
     </el-main>
   </el-container>
 </template>
 
 <script>
+import { Splitpanes, Pane } from 'splitpanes'
+import 'splitpanes/dist/splitpanes.css'
 import { generateHTMLTable, parseDataToSchema } from 'json5-to-table'
 
 const validateJSONText = (rule, value, callback) => {
@@ -46,6 +48,7 @@ const validateJSONText = (rule, value, callback) => {
 
 export default {
   name: 'App',
+  components: { Splitpanes, Pane },
   data () {
     return {
       tableHTML: '',
@@ -101,4 +104,18 @@ export default {
 </script>
 
 <style lang="scss">
+.app-main {
+  height: calc(100vh - 60px);
+
+  .splitpanes__pane {
+    box-shadow: 0 0 5px rgba(0, 0, 0, .2) inset;
+    padding: 10px;
+  }
+
+
+  .splitpanes--vertical > .splitpanes__splitter {
+    min-width: 6px;
+    background: linear-gradient(90deg, #ccc, #111);
+  }
+}
 </style>

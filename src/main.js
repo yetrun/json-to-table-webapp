@@ -7,6 +7,7 @@ import './assets/global.scss'
 Vue.config.productionTip = false
 
 Vue.use(ElementUI)
+Vue.component()
 
 new Vue({
   render: h => h(App),
