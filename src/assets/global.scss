@@ -1,0 +1,36 @@
+body {
+  padding: 0;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.beautiful-table {
+  border-collapse: collapse;
+  width:100%;
+  border:1px solid #c6c6c6 !important;
+  margin-bottom:20px;
+
+  th{
+    border-collapse: collapse;
+    border-right:1px solid #c6c6c6 !important;
+    border-bottom:1px solid #c6c6c6 !important;
+    background-color:#ddeeff !important; 
+    padding:5px 9px;
+    font-size:14px;
+    font-weight:normal;
+    text-align:center;
+  }
+  td{
+    border-collapse: collapse;
+    border-right:1px solid #c6c6c6 !important;
+    border-bottom:1px solid #c6c6c6 !important; 
+    padding:5px 9px;
+    font-size:12px;
+    font-weight:normal;
+    text-align:center;
+    word-break: break-all;
+  }
+}
