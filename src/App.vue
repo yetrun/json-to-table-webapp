@@ -8,24 +8,42 @@
       <!-- 左右分开，一边是 JSON 源代码，一边是表格 -->
       <splitpanes>
         <pane size="35" style="font-size: 1em;">
-          <el-form ref="sourceForm" :rules="rules" :model="source" hide-required-asterisk>
+          <el-form ref="sourceForm" :rules="rules" :model="source" hide-required-asterisk :show-message="false">
             <splitpanes horizontal style="height: calc(100vh - 100px)">
               <pane>
                 <el-form-item prop="schema">
-                  <codemirror v-model="source.schema" :options="cmOptions" style="height: 100%" @input="clearValidate('schema')" />
+                  <el-tabs type="border-card">
+                    <el-tab-pane label="Schema">
+                      <codemirror v-model="source.schema" :options="cmOptions" style="height: 100%" @input="clearValidate('schema')" />
+                    </el-tab-pane>
+                    <el-tab-pane v-if="errors.schema" disabled>
+                      <span slot="label">{{ errors.schema }}</span>
+                    </el-tab-pane>
+                  </el-tabs>
                 </el-form-item>
               </pane>
               <pane>
                 <el-form-item prop="data">
-                  <codemirror v-model="source.data" :options="cmOptions" style="height: 100%" @input="clearValidate('data')" />
+                  <el-tabs type="border-card">
+                    <el-tab-pane label="Data">
+                      <codemirror v-model="source.data" :options="cmOptions" style="height: 100%" @input="clearValidate('data')" />
+                    </el-tab-pane>
+                    <el-tab-pane v-if="errors.data" disabled>
+                      <span slot="label">{{ errors.data }}</span>
+                    </el-tab-pane>
+                  </el-tabs>
                 </el-form-item>
               </pane>
             </splitpanes>
           </el-form>
         </pane>
         <pane>
-          <div v-html="tableHTML" v-if="tableHTML"></div>
-          <el-empty description="请点击导航栏上的生成按钮生成表格" v-else></el-empty>
+          <el-tabs type="border-card">
+            <el-tab-pane label="Table">
+              <div v-html="tableHTML" v-if="tableHTML"></div>
+              <el-empty description="请点击导航栏上的生成按钮生成表格" v-else></el-empty>
+            </el-tab-pane>
+          </el-tabs>
         </pane>
       </splitpanes>
     </el-main>
@@ -74,6 +92,10 @@ export default {
         ]),
         schema: ''
       },
+      errors: {
+        data: null,
+        schema: null
+      },
       rules: {
         schema: [
           { validator: validateJSONText, trigger: 'none' }
@@ -87,7 +109,7 @@ export default {
   },
   methods: {
     generateTableHTML () {
-      this.$refs.sourceForm.validate(isValid => {
+      this.$refs.sourceForm.validate((isValid, errors) => {
         try {
           if (isValid) {
             let dataObject = this.source.data && JSON.parse(this.source.data)
@@ -103,6 +125,11 @@ export default {
                 table: { class: 'beautiful-table' }
               }
             })
+          } else {
+            this.errors = {
+              schema: errors.schema && errors.schema[0].message,
+              data: errors.data && errors.data[0].message,
+            }
           }
         } catch (ex) {
           // element 表单的 validate 方法好像会吃掉异常，因此主动地打印出来求结果
@@ -112,7 +139,8 @@ export default {
       })
     },
     clearValidate (prop) {
-      this.$refs.sourceForm.clearValidate(prop)
+      this.errors[prop] = null
+      // this.$refs.sourceForm.clearValidate(prop)
     }
   }
 }
@@ -126,13 +154,26 @@ export default {
     height: 100%;
   }
 
+  .el-tabs {
+    height: 100%;
+  }
+
+  .el-tabs__content {
+    height: calc(100% - 39px);
+    padding: 0;
+  }
+
+  .el-tab-pane {
+    height: 100%;
+  }
+
   .el-form-item {
     height: 100%;
     margin-bottom: 0;
   }
 
   .el-form-item__content {
-    height: calc(100% - 20px);
+    height: calc(100%);
     line-height: 1em;
     font-size: 1em;
   }
@@ -143,13 +184,13 @@ export default {
   }
 
   .splitpanes--vertical > .splitpanes__splitter {
-    min-width: 6px;
-    background: linear-gradient(90deg, #ccc, #111);
+    min-width: 18px;
+    background: blue;
   }
 
   .splitpanes--horizontal > .splitpanes__splitter {
-    min-height: 6px;
-    background: linear-gradient(0deg, #ccc, #111);
+    min-height: 18px;
+    background: blue;
   }
 }
 </style>
