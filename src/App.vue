@@ -7,35 +7,29 @@
     <el-main class="app-main">
       <!-- 左右分开，一边是 JSON 源代码，一边是表格 -->
       <splitpanes>
-        <pane size="35" style="font-size: 1em;">
-          <el-form ref="sourceForm" :rules="rules" :model="source" hide-required-asterisk :show-message="false">
-            <splitpanes horizontal style="height: calc(100vh - 100px)">
-              <pane>
-                <el-form-item prop="schema">
-                  <el-tabs type="border-card">
-                    <el-tab-pane label="Schema">
-                      <codemirror v-model="source.schema" :options="cmOptions" style="height: 100%" @input="clearValidate('schema')" />
-                    </el-tab-pane>
-                    <el-tab-pane v-if="errors.schema" disabled>
-                      <span slot="label">{{ errors.schema }}</span>
-                    </el-tab-pane>
-                  </el-tabs>
-                </el-form-item>
-              </pane>
-              <pane>
-                <el-form-item prop="data">
-                  <el-tabs type="border-card">
-                    <el-tab-pane label="Data">
-                      <codemirror v-model="source.data" :options="cmOptions" style="height: 100%" @input="clearValidate('data')" />
-                    </el-tab-pane>
-                    <el-tab-pane v-if="errors.data" disabled>
-                      <span slot="label">{{ errors.data }}</span>
-                    </el-tab-pane>
-                  </el-tabs>
-                </el-form-item>
-              </pane>
-            </splitpanes>
-          </el-form>
+        <pane size="35">
+          <splitpanes horizontal style="height: calc(100vh - 100px)">
+            <pane>
+              <el-tabs type="border-card">
+                <el-tab-pane label="Schema">
+                  <codemirror v-model="source.schema" :options="cmOptions" style="height: 100%" @input="clearValidate('schema')" />
+                </el-tab-pane>
+                <el-tab-pane v-if="errors.schema" disabled>
+                  <span slot="label">{{ errors.schema }}</span>
+                </el-tab-pane>
+              </el-tabs>
+            </pane>
+            <pane>
+              <el-tabs type="border-card">
+                <el-tab-pane label="Data">
+                  <codemirror v-model="source.data" :options="cmOptions" style="height: 100%" @input="clearValidate('data')" />
+                </el-tab-pane>
+                <el-tab-pane v-if="errors.data" disabled>
+                  <span slot="label">{{ errors.data }}</span>
+                </el-tab-pane>
+              </el-tabs>
+            </pane>
+          </splitpanes>
         </pane>
         <pane>
           <el-tabs type="border-card">
@@ -51,6 +45,7 @@
 </template>
 
 <script>
+import Schema from 'async-validator'
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import 'codemirror/mode/javascript/javascript.js'
@@ -71,6 +66,16 @@ const validateJSONText = (rule, value, callback) => {
     }
   }
 }
+
+const validator = new Schema({
+  schema: [
+    { validator: validateJSONText, trigger: 'none' }
+  ],
+  data: [
+    { required: true, message: '请输入 Data 内容', trigger: 'none' },
+    { validator: validateJSONText, trigger: 'none' }
+  ]
+})
 
 export default {
   name: 'App',
@@ -109,9 +114,14 @@ export default {
   },
   methods: {
     generateTableHTML () {
-      this.$refs.sourceForm.validate((isValid, errors) => {
+      validator.validate(this.source, (_, errors) => {
         try {
-          if (isValid) {
+          if (errors) {
+            this.errors = {
+              schema: errors.schema && errors.schema[0].message,
+              data: errors.data && errors.data[0].message,
+            }
+          } else {
             let dataObject = this.source.data && JSON.parse(this.source.data)
             let schemaObject = this.source.schema && JSON.parse(this.source.schema)
 
@@ -125,11 +135,6 @@ export default {
                 table: { class: 'beautiful-table' }
               }
             })
-          } else {
-            this.errors = {
-              schema: errors.schema && errors.schema[0].message,
-              data: errors.data && errors.data[0].message,
-            }
           }
         } catch (ex) {
           // element 表单的 validate 方法好像会吃掉异常，因此主动地打印出来求结果
