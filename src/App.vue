@@ -1,18 +1,23 @@
 <template>
   <el-container>
-    <el-header>
-      <el-button @click="generateTableHTML">生成</el-button>
+    <el-header class="app-header">
+      <el-button type="info" @click="generateTableHTML">生成</el-button>
     </el-header>
 
     <el-main class="app-main">
       <!-- 左右分开，一边是 JSON 源代码，一边是表格 -->
       <splitpanes>
-        <pane size="35">
-          <splitpanes horizontal style="height: calc(100vh - 100px)">
-            <pane>
-              <el-tabs type="border-card">
-                <el-tab-pane label="Schema">
-                  <codemirror v-model="source.schema" :options="cmOptions" style="height: 100%" @input="clearValidate('schema')" />
+        <pane size="33">
+          <splitpanes horizontal class="app-code-pane">
+            <pane size="33">
+              <el-tabs type="border-card" style="height: 100%">
+                <el-tab-pane>
+                  <span slot="label" class="app-tab-label">
+                    Schema
+                  </span>
+                  <div style="height: 100%">
+                    <codemirror v-model="source.schema" :options="cmOptions" class="app-codemirror-container" @input="clearValidate('schema')" />
+                  </div>
                 </el-tab-pane>
                 <el-tab-pane v-if="errors.schema" disabled>
                   <span slot="label">{{ errors.schema }}</span>
@@ -20,9 +25,12 @@
               </el-tabs>
             </pane>
             <pane>
-              <el-tabs type="border-card">
-                <el-tab-pane label="Data">
-                  <codemirror v-model="source.data" :options="cmOptions" style="height: 100%" @input="clearValidate('data')" />
+              <el-tabs type="border-card" style="height: 100%">
+                <el-tab-pane>
+                  <span slot="label" class="app-tab-label">
+                    Data
+                  </span>
+                  <codemirror v-model="source.data" :options="cmOptions" class="app-codemirror-container" @input="clearValidate('data')" />
                 </el-tab-pane>
                 <el-tab-pane v-if="errors.data" disabled>
                   <span slot="label">{{ errors.data }}</span>
@@ -32,10 +40,15 @@
           </splitpanes>
         </pane>
         <pane>
-          <el-tabs type="border-card">
-            <el-tab-pane label="Table">
-              <div v-html="tableHTML" v-if="tableHTML"></div>
-              <el-empty description="请点击导航栏上的生成按钮生成表格" v-else></el-empty>
+          <el-tabs type="border-card" style="height: 100%">
+            <el-tab-pane class="a">
+              <span slot="label" class="app-tab-label">
+                Table
+              </span>
+              <div class="table-container">
+                <div v-html="tableHTML" v-if="tableHTML"></div>
+                <el-empty description="请点击导航栏上的生成按钮生成表格" v-else></el-empty>
+              </div>
             </el-tab-pane>
           </el-tabs>
         </pane>
@@ -45,12 +58,17 @@
 </template>
 
 <script>
-import Schema from 'async-validator'
+import Validator from 'async-validator'
+import { generateHTMLTable, parseDataToSchema } from 'json5-to-table'
+
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
+
+import { codemirror } from 'vue-codemirror'
+import 'codemirror/lib/codemirror.css'
 import 'codemirror/mode/javascript/javascript.js'
 import 'codemirror/theme/base16-dark.css'
-import { generateHTMLTable, parseDataToSchema } from 'json5-to-table'
+import 'codemirror/theme/darcula.css'
 
 const validateJSONText = (rule, value, callback) => {
   try {
@@ -67,7 +85,7 @@ const validateJSONText = (rule, value, callback) => {
   }
 }
 
-const validator = new Schema({
+const validator = new Validator({
   schema: [
     { validator: validateJSONText, trigger: 'none' }
   ],
@@ -79,13 +97,13 @@ const validator = new Schema({
 
 export default {
   name: 'App',
-  components: { Splitpanes, Pane },
+  components: { Splitpanes, Pane, codemirror },
   data () {
     return {
       cmOptions: {
-        tabSize: 4,
+        tabSize: 2,
         mode: 'text/javascript',
-        theme: 'base16-dark',
+        theme: 'darcula',
         lineNumbers: true,
         line: true
       },
@@ -145,57 +163,84 @@ export default {
     },
     clearValidate (prop) {
       this.errors[prop] = null
-      // this.$refs.sourceForm.clearValidate(prop)
     }
   }
 }
 </script>
 
 <style lang="scss">
+$surround-background: #060606;
+$table-background: #f2f2f2;
+$pane-border-color: #1d1e22;
+$pane-border-width: 18px;
+$tab-label-text-color: hsl(227deg 12% 70%);
+
+.app-header {
+  background: $surround-background;
+
+  display: flex;
+  align-items: center;
+}
+
 .app-main {
   height: calc(100vh - 60px);
+  padding: 0;
+  border: $pane-border-width solid $surround-background;
+  border-top: none;
 
-  .CodeMirror {
-    height: 100%;
+  // 修改 Tab 标签的字体、颜色
+  .app-tab-label {
+    font-weight: 700;
+    font-size: 1.2em;
+    color: $tab-label-text-color;
   }
 
-  .el-tabs {
-    height: 100%;
+  // 修改 Element Tab 组件边框的颜色
+  .el-tabs--border-card {
+    border: 1px solid $pane-border-color;
   }
 
+  // 修改 Element Tab 组件导航栏的颜色
+  .el-tabs__header {
+    .el-tabs__nav-scroll {
+      background: $surround-background;
+    }
+    .el-tabs__item {
+      background: $pane-border-color !important;
+      border: none !important;
+    }
+  }
+
+  // 将 Element Tab 组件的内容铺满父容器
   .el-tabs__content {
     height: calc(100% - 39px);
     padding: 0;
+
+    .el-tab-pane {
+      height: 100%;
+    }
   }
 
-  .el-tab-pane {
-    height: 100%;
-  }
-
-  .el-form-item {
-    height: 100%;
-    margin-bottom: 0;
-  }
-
-  .el-form-item__content {
-    height: calc(100%);
-    line-height: 1em;
-    font-size: 1em;
-  }
-
-  .splitpanes__pane {
-    box-shadow: 0 0 5px rgba(0, 0, 0, .2) inset;
-    /* padding: 10px; */
-  }
-
+  // 修改 splitpanes 的 spliter 的宽度、颜色
   .splitpanes--vertical > .splitpanes__splitter {
-    min-width: 18px;
-    background: blue;
+    min-width: $pane-border-width;
+    background: $surround-background;
+  }
+  .splitpanes--horizontal > .splitpanes__splitter {
+    min-height: $pane-border-width;
+    background: $surround-background;
   }
 
-  .splitpanes--horizontal > .splitpanes__splitter {
-    min-height: 18px;
-    background: blue;
+  // CodeMirror 内部的 textarea 高度 100%
+  .app-codemirror-container {
+    height: 100%;
+    .CodeMirror { height: 100%; }
+  }
+
+  .table-container {
+    background: $table-background;
+    height: 100%;
+    overflow: auto;
   }
 }
 </style>
