@@ -2437,6 +2437,11 @@ coa@^2.0.2:
     chalk "^2.4.1"
     q "^1.1.2"
 
+codemirror@^5.41.0:
+  version "5.63.3"
+  resolved "https://registry.npmmirror.com/codemirror/download/codemirror-5.63.3.tgz#97042a242027fe0c87c09b36bc01931d37b76527"
+  integrity sha1-lwQqJCAn/gyHwJs2vAGTHTe3ZSc=
+
 collection-visit@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npm.taobao.org/collection-visit/download/collection-visit-1.0.0.tgz#4bc0373c164bc3291b4d368c829cf1a80a59dca0"
@@ -3064,6 +3069,11 @@ detect-node@^2.0.4:
   version "2.1.0"
   resolved "https://registry.nlark.com/detect-node/download/detect-node-2.1.0.tgz?cache=0&sync_timestamp=1621146902208&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fdetect-node%2Fdownload%2Fdetect-node-2.1.0.tgz#c9c70775a49c3d03bc2c06d9a73be550f978f8b1"
   integrity sha1-yccHdaScPQO8LAbZpzvlUPl4+LE=
+
+diff-match-patch@^1.0.0:
+  version "1.0.5"
+  resolved "https://registry.npm.taobao.org/diff-match-patch/download/diff-match-patch-1.0.5.tgz#abb584d5f10cd1196dfc55aa03701592ae3f7b37"
+  integrity sha1-q7WE1fEM0Rlt/FWqA3AVkq4/ezc=
 
 diffie-hellman@^5.0.0:
   version "5.0.3"
@@ -7723,6 +7733,14 @@ vm-browserify@^1.0.1:
   version "1.1.2"
   resolved "https://registry.npm.taobao.org/vm-browserify/download/vm-browserify-1.1.2.tgz#78641c488b8e6ca91a75f511e7a3b32a86e5dda0"
   integrity sha1-eGQcSIuObKkadfUR56OzKobl3aA=
+
+vue-codemirror@^4.0.6:
+  version "4.0.6"
+  resolved "https://registry.nlark.com/vue-codemirror/download/vue-codemirror-4.0.6.tgz#b786bb80d8d762a93aab8e46f79a81006f0437c4"
+  integrity sha1-t4a7gNjXYqk6q45G95qBAG8EN8Q=
+  dependencies:
+    codemirror "^5.41.0"
+    diff-match-patch "^1.0.0"
 
 vue-hot-reload-api@^2.3.0:
   version "2.3.4"

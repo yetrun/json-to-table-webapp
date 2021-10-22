@@ -7,14 +7,20 @@
     <el-main class="app-main">
       <!-- 左右分开，一边是 JSON 源代码，一边是表格 -->
       <splitpanes>
-        <pane size="35">
-          <el-form ref="sourceForm" :rules="rules" :model="source" label-width="60px" hide-required-asterisk>
-            <el-form-item label="Schema" prop="schema">
-              <el-input type="textarea" rows="10" v-model="source.schema" @input="clearValidate('schema')" />
-            </el-form-item>
-            <el-form-item label="Data" prop="data">
-              <el-input type="textarea" rows="20" v-model="source.data" @input="clearValidate('data')" />
-            </el-form-item>
+        <pane size="35" style="font-size: 1em;">
+          <el-form ref="sourceForm" :rules="rules" :model="source" hide-required-asterisk>
+            <splitpanes horizontal style="height: calc(100vh - 100px)">
+              <pane>
+                <el-form-item prop="schema">
+                  <codemirror v-model="source.schema" :options="cmOptions" style="height: 100%" @input="clearValidate('schema')" />
+                </el-form-item>
+              </pane>
+              <pane>
+                <el-form-item prop="data">
+                  <codemirror v-model="source.data" :options="cmOptions" style="height: 100%" @input="clearValidate('data')" />
+                </el-form-item>
+              </pane>
+            </splitpanes>
           </el-form>
         </pane>
         <pane>
@@ -29,6 +35,8 @@
 <script>
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
+import 'codemirror/mode/javascript/javascript.js'
+import 'codemirror/theme/base16-dark.css'
 import { generateHTMLTable, parseDataToSchema } from 'json5-to-table'
 
 const validateJSONText = (rule, value, callback) => {
@@ -51,6 +59,13 @@ export default {
   components: { Splitpanes, Pane },
   data () {
     return {
+      cmOptions: {
+        tabSize: 4,
+        mode: 'text/javascript',
+        theme: 'base16-dark',
+        lineNumbers: true,
+        line: true
+      },
       tableHTML: '',
       source: {
         data: JSON.stringify([
@@ -107,15 +122,34 @@ export default {
 .app-main {
   height: calc(100vh - 60px);
 
-  .splitpanes__pane {
-    box-shadow: 0 0 5px rgba(0, 0, 0, .2) inset;
-    padding: 10px;
+  .CodeMirror {
+    height: 100%;
   }
 
+  .el-form-item {
+    height: 100%;
+    margin-bottom: 0;
+  }
+
+  .el-form-item__content {
+    height: calc(100% - 20px);
+    line-height: 1em;
+    font-size: 1em;
+  }
+
+  .splitpanes__pane {
+    box-shadow: 0 0 5px rgba(0, 0, 0, .2) inset;
+    /* padding: 10px; */
+  }
 
   .splitpanes--vertical > .splitpanes__splitter {
     min-width: 6px;
     background: linear-gradient(90deg, #ccc, #111);
+  }
+
+  .splitpanes--horizontal > .splitpanes__splitter {
+    min-height: 6px;
+    background: linear-gradient(0deg, #ccc, #111);
   }
 }
 </style>
