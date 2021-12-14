@@ -1,7 +1,22 @@
 <template>
   <el-container>
+    <div v-show="false">
+      <input type="file" ref="fileInput.schema" />
+      <input type="file" ref="fileInput.data" />
+    </div>
+
     <el-header class="app-header">
       <el-button type="info" @click="generateTableHTML">生成</el-button>
+
+			<el-dropdown @command="readFile">
+				<el-button type="info">
+					导入 JSON<i class="el-icon-arrow-down el-icon--right"></i>
+				</el-button>
+				<el-dropdown-menu slot="dropdown">
+					<el-dropdown-item command="schema">导入模式文件</el-dropdown-item>
+					<el-dropdown-item command="data">导入数据文件</el-dropdown-item>
+				</el-dropdown-menu>
+			</el-dropdown>
     </el-header>
 
     <el-main class="app-main">
@@ -130,7 +145,28 @@ export default {
       }
     }
   },
+  mounted () {
+    this.$refs['fileInput.data'].addEventListener('change', e => this.setFileContent('data', e), false);
+    this.$refs['fileInput.schema'].addEventListener('change', e => this.setFileContent('schema', e), false);
+  },
   methods: {
+    readFile (field) {
+      const ref = `fileInput.${field}`
+      this.$refs[ref].click()
+    },
+    setFileContent (field, e) {
+      const files = e.target.files
+      const file = files[0]
+
+      const reader = new FileReader()
+
+      reader.onload = e => {
+        const text = e.target.result
+        this.source[field] = text
+      }
+
+      reader.readAsText(file)
+    },
     generateTableHTML () {
       validator.validate(this.source, (_, errors) => {
         try {
@@ -173,13 +209,22 @@ $surround-background: #060606;
 $table-background: #f2f2f2;
 $pane-border-color: #1d1e22;
 $pane-border-width: 18px;
-$tab-label-text-color: hsl(227deg 12% 70%);
+$tab-label-text-color: #a9adbc;
 
 .app-header {
   background: $surround-background;
 
   display: flex;
   align-items: center;
+
+  // 去掉菜单的边框
+  .el-menu.el-menu--horizontal {
+    border-bottom: none;
+  }
+
+  * {
+    margin: 0 8px;
+  }
 }
 
 .app-main {
