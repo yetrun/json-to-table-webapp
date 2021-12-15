@@ -35,7 +35,7 @@
                   </div>
                 </el-tab-pane>
                 <el-tab-pane v-if="errors.schema" disabled>
-                  <span slot="label">{{ errors.schema }}</span>
+                  <span style="color: red" slot="label">{{ errors.schema }}</span>
                 </el-tab-pane>
               </el-tabs>
             </pane>
@@ -48,7 +48,7 @@
                   <codemirror v-model="source.data" :options="cmOptions" class="app-codemirror-container" @input="clearValidate('data')" />
                 </el-tab-pane>
                 <el-tab-pane v-if="errors.data" disabled>
-                  <span slot="label">{{ errors.data }}</span>
+                  <span style="color: red" slot="label">{{ errors.data }}</span>
                 </el-tab-pane>
               </el-tabs>
             </pane>
@@ -64,6 +64,12 @@
                 <div v-html="tableHTML" v-if="tableHTML"></div>
                 <el-empty description="请点击导航栏上的生成按钮生成表格" v-else></el-empty>
               </div>
+            </el-tab-pane>
+
+            <el-tab-pane v-if="tableGeneratingSummary" disabled>
+              <span slot="label">
+                数据总量 {{ tableGeneratingSummary.dataCount }} 个
+              </span>
             </el-tab-pane>
           </el-tabs>
         </pane>
@@ -123,6 +129,7 @@ export default {
         line: true
       },
       tableHTML: '',
+      tableGeneratingSummary: null,
       source: {
         data: JSON.stringify([
           { a: 1, b: 2 },
@@ -189,6 +196,10 @@ export default {
                 table: { class: 'beautiful-table' }
               }
             })
+
+            this.tableGeneratingSummary = {
+              dataCount: dataObject.length || 1
+            }
           }
         } catch (ex) {
           // element 表单的 validate 方法好像会吃掉异常，因此主动地打印出来求结果
@@ -210,6 +221,7 @@ $table-background: #f2f2f2;
 $pane-border-color: #1d1e22;
 $pane-border-width: 18px;
 $tab-label-text-color: #a9adbc;
+$pane-header-background: #060606;
 
 .app-header {
   background: $surround-background;
@@ -250,10 +262,21 @@ $tab-label-text-color: #a9adbc;
     .el-tabs__nav-scroll {
       background: $surround-background;
     }
+
     .el-tabs__item {
       background: $pane-border-color !important;
       border: none !important;
     }
+
+    // 从第二个孩子开始背景色设置为与 Tab Header 背景色一致;
+    .el-tabs__item:nth-child(n+2) {
+      background: $pane-header-background !important;
+    }
+  }
+
+  // Tab 提示的颜色
+  .tab-error {
+    color: red;
   }
 
   // 将 Element Tab 组件的内容铺满父容器
