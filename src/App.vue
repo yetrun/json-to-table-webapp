@@ -61,15 +61,23 @@
                 Table
               </span>
               <div class="table-container">
-                <div v-html="tableHTML" v-if="tableHTML"></div>
+                <div v-html="table.html" v-if="table.html"></div>
                 <el-empty description="请点击导航栏上的生成按钮生成表格" v-else></el-empty>
               </div>
             </el-tab-pane>
 
-            <el-tab-pane v-if="tableGeneratingSummary" disabled>
-              <span slot="label">
-                数据总量 {{ tableGeneratingSummary.dataCount }} 个
-              </span>
+            <el-tab-pane v-if="table.summary" disabled>
+              <el-tooltip 
+                slot="label" 
+                effect="dark" 
+                content="内核耗时指生成表格 HTML 源码的时间，剩下的耗时是加载 DOM 所花费的时间" 
+                placement="top-start"
+              >
+                <span>
+                  数据总量 {{ table.summary.dataCount }} 个，
+                  内核运行耗时 {{ table.summary.timeConsuming }} ms
+                </span>
+              </el-tooltip>
             </el-tab-pane>
           </el-tabs>
         </pane>
@@ -128,8 +136,10 @@ export default {
         lineNumbers: true,
         line: true
       },
-      tableHTML: '',
-      tableGeneratingSummary: null,
+      table: {
+        html: '',
+        summary: null
+      },
       source: {
         data: JSON.stringify([
           { a: 1, b: 2 },
@@ -175,6 +185,8 @@ export default {
       reader.readAsText(file)
     },
     generateTableHTML () {
+      const start = Date.now()
+
       validator.validate(this.source, (_, errors) => {
         try {
           if (errors) {
@@ -191,14 +203,15 @@ export default {
               this.source.schema = JSON.stringify(schemaObject, null, 2)
             }
 
-            this.tableHTML = generateHTMLTable(dataObject, schemaObject, {
+            this.table.html = generateHTMLTable(dataObject, schemaObject, {
               attributes: {
                 table: { class: 'beautiful-table' }
               }
             })
 
-            this.tableGeneratingSummary = {
-              dataCount: dataObject.length || 1
+            this.table.summary = {
+              dataCount: dataObject.length || 1,
+              timeConsuming: Date.now() - start
             }
           }
         } catch (ex) {
