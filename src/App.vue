@@ -25,61 +25,47 @@
         <pane size="33">
           <splitpanes horizontal class="app-code-pane">
             <pane size="33">
-              <el-tabs type="border-card" style="height: 100%">
-                <el-tab-pane>
-                  <span slot="label" class="app-tab-label">
-                    Schema
-                  </span>
-                  <div style="height: 100%">
-                    <codemirror v-model="source.schema" :options="cmOptions" class="app-codemirror-container" @input="clearValidate('schema')" />
-                  </div>
-                </el-tab-pane>
-                <el-tab-pane v-if="errors.schema" disabled>
-                  <span style="color: red" slot="label">{{ errors.schema }}</span>
-                </el-tab-pane>
-              </el-tabs>
+              <Panel
+                title="Schema" 
+                :prompt="errors.schema"
+                promptType="error"
+              >
+                <codemirror v-model="source.schema" :options="cmOptions" class="app-codemirror-container" @input="clearValidate('schema')" />
+              </Panel>
             </pane>
             <pane>
-              <el-tabs type="border-card" style="height: 100%">
-                <el-tab-pane>
-                  <span slot="label" class="app-tab-label">
-                    Data
-                  </span>
-                  <codemirror v-model="source.data" :options="cmOptions" class="app-codemirror-container" @input="clearValidate('data')" />
-                </el-tab-pane>
-                <el-tab-pane v-if="errors.data" disabled>
-                  <span style="color: red" slot="label">{{ errors.data }}</span>
-                </el-tab-pane>
-              </el-tabs>
+              <Panel
+                title="Data"
+                :prompt="errors.data"
+                promptType="error"
+              >
+                <codemirror v-model="source.data" :options="cmOptions" class="app-codemirror-container" @input="clearValidate('data')" />
+              </Panel>
             </pane>
           </splitpanes>
         </pane>
         <pane>
-          <el-tabs type="border-card" style="height: 100%">
-            <el-tab-pane class="a">
-              <span slot="label" class="app-tab-label">
-                Table
-              </span>
-              <div class="table-container">
-                <div v-html="table.html" v-if="table.html"></div>
-                <el-empty description="请点击导航栏上的生成按钮生成表格" v-else></el-empty>
-              </div>
-            </el-tab-pane>
+          <Panel
+            title ="Table"
+          >
+            <div class="table-container">
+              <div v-html="table.html" v-if="table.html"></div>
+              <el-empty description="请点击导航栏上的生成按钮生成表格" v-else></el-empty>
+            </div>
 
-            <el-tab-pane v-if="table.summary" disabled>
-              <el-tooltip 
-                slot="label" 
-                effect="dark" 
-                content="内核耗时指生成表格 HTML 源码的时间，剩下的耗时是加载 DOM 所花费的时间" 
-                placement="top-start"
-              >
-                <span>
-                  数据总量 {{ table.summary.dataCount }} 个，
-                  内核运行耗时 {{ table.summary.timeConsuming }} ms
-                </span>
-              </el-tooltip>
-            </el-tab-pane>
-          </el-tabs>
+            <el-tooltip 
+              effect="dark" 
+              content="内核耗时指生成表格 HTML 源码的时间，剩下的耗时是加载 DOM 所花费的时间" 
+              placement="top-start"
+              slot="prompt"
+              v-if="table.summary"
+            >
+              <span>
+                数据总量 {{ table.summary.dataCount }} 个，
+                内核运行耗时 {{ table.summary.timeConsuming }} ms
+              </span>
+            </el-tooltip>
+          </Panel>
         </pane>
       </splitpanes>
     </el-main>
@@ -98,6 +84,8 @@ import 'codemirror/lib/codemirror.css'
 import 'codemirror/mode/javascript/javascript.js'
 import 'codemirror/theme/base16-dark.css'
 import 'codemirror/theme/darcula.css'
+
+import Panel from '@/components/Panel'
 
 const validateJSONText = (rule, value, callback) => {
   try {
@@ -126,7 +114,7 @@ const validator = new Validator({
 
 export default {
   name: 'App',
-  components: { Splitpanes, Pane, codemirror },
+  components: { Splitpanes, Pane, codemirror, Panel },
   data () {
     return {
       cmOptions: {
@@ -257,50 +245,6 @@ $pane-header-background: #060606;
   padding: 0;
   border: $pane-border-width solid $surround-background;
   border-top: none;
-
-  // 修改 Tab 标签的字体、颜色
-  .app-tab-label {
-    font-weight: 700;
-    font-size: 1.2em;
-    color: $tab-label-text-color;
-  }
-
-  // 修改 Element Tab 组件边框的颜色
-  .el-tabs--border-card {
-    border: 1px solid $pane-border-color;
-  }
-
-  // 修改 Element Tab 组件导航栏的颜色
-  .el-tabs__header {
-    .el-tabs__nav-scroll {
-      background: $surround-background;
-    }
-
-    .el-tabs__item {
-      background: $pane-border-color !important;
-      border: none !important;
-    }
-
-    // 从第二个孩子开始背景色设置为与 Tab Header 背景色一致;
-    .el-tabs__item:nth-child(n+2) {
-      background: $pane-header-background !important;
-    }
-  }
-
-  // Tab 提示的颜色
-  .tab-error {
-    color: red;
-  }
-
-  // 将 Element Tab 组件的内容铺满父容器
-  .el-tabs__content {
-    height: calc(100% - 39px);
-    padding: 0;
-
-    .el-tab-pane {
-      height: 100%;
-    }
-  }
 
   // 修改 splitpanes 的 spliter 的宽度、颜色
   .splitpanes--vertical > .splitpanes__splitter {
