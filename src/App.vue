@@ -217,15 +217,13 @@ export default {
 </script>
 
 <style lang="scss">
-$surround-background: #060606;
-$table-background: #f2f2f2;
-$pane-border-color: #1d1e22;
-$pane-border-width: 18px;
-$tab-label-text-color: #a9adbc;
-$pane-header-background: #060606;
+$main-background: #060606; // 主要的背景色，用于 Header、Spliter、页面背景等
+$main-border-width: 18px; // 主要的边框宽度，每个 SplitPane 的边框宽度，Spliter 的宽度都应该应用这个宽度
+
+$table-background: #f2f2f2; // 表格容器的背景色
 
 .app-header {
-  background: $surround-background;
+  background: $main-background;
 
   display: flex;
   align-items: center;
@@ -243,17 +241,17 @@ $pane-header-background: #060606;
 .app-main {
   height: calc(100vh - 60px);
   padding: 0;
-  border: $pane-border-width solid $surround-background;
+  border: $main-border-width solid $main-background;
   border-top: none;
 
   // 修改 splitpanes 的 spliter 的宽度、颜色
   .splitpanes--vertical > .splitpanes__splitter {
-    min-width: $pane-border-width;
-    background: $surround-background;
+    min-width: $main-border-width;
+    background: $main-background;
   }
   .splitpanes--horizontal > .splitpanes__splitter {
-    min-height: $pane-border-width;
-    background: $surround-background;
+    min-height: $main-border-width;
+    background: $main-background;
   }
 
   // CodeMirror 内部的 textarea 高度 100%
