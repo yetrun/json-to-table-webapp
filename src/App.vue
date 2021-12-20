@@ -6,17 +6,22 @@
     </div>
 
     <el-header class="app-header">
-      <el-button type="info" @click="generateTableHTML">生成</el-button>
+      <span class="left">
+        <el-button type="info" @click="generateTableHTML">生成</el-button>
+        <el-dropdown @command="readFile">
+          <el-button type="info">
+            导入 JSON<i class="el-icon-arrow-down el-icon--right"></i>
+          </el-button>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="schema">导入模式文件</el-dropdown-item>
+            <el-dropdown-item command="data">导入数据文件</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </span>
 
-			<el-dropdown @command="readFile">
-				<el-button type="info">
-					导入 JSON<i class="el-icon-arrow-down el-icon--right"></i>
-				</el-button>
-				<el-dropdown-menu slot="dropdown">
-					<el-dropdown-item command="schema">导入模式文件</el-dropdown-item>
-					<el-dropdown-item command="data">导入数据文件</el-dropdown-item>
-				</el-dropdown-menu>
-			</el-dropdown>
+      <span class="right">
+        <el-checkbox v-model="config.generateSequence">生成序号</el-checkbox>
+      </span>
     </el-header>
 
     <el-main class="app-main">
@@ -112,6 +117,18 @@ const validator = new Validator({
   ]
 })
 
+function addSequenceInfo (data, schema) {
+  if (!Array.isArray(data)) {
+    data = [data]
+  }
+  data = data.map((dataItem, index) => Object.assign({}, { _seq: index + 1 }, dataItem))
+
+  schema = schema.slice()
+  schema.unshift({ title: '序号', path: '_seq' })
+
+  return [data, schema]
+}
+
 export default {
   name: 'App',
   components: { Splitpanes, Pane, codemirror, Panel },
@@ -147,6 +164,9 @@ export default {
           { required: true, message: '请输入 Data 内容', trigger: 'none' },
           { validator: validateJSONText, trigger: 'none' }
         ]
+      },
+      config: {
+        generateSequence: false
       }
     }
   },
@@ -191,6 +211,10 @@ export default {
               this.source.schema = JSON.stringify(schemaObject, null, 2)
             }
 
+            if (this.config.generateSequence) {
+              [dataObject, schemaObject] = addSequenceInfo(dataObject, schemaObject)
+            }
+
             this.table.html = generateHTMLTable(dataObject, schemaObject, {
               attributes: {
                 table: { class: 'beautiful-table' }
@@ -226,15 +250,23 @@ $table-background: #f2f2f2; // 表格容器的背景色
   background: $main-background;
 
   display: flex;
+  justify-content: space-between;
   align-items: center;
+
+  .left {
+    > * {
+      margin: 0 8px;
+    }
+  }
+
+  .right {
+    padding: 0 8px;
+    background: orange;
+  }
 
   // 去掉菜单的边框
   .el-menu.el-menu--horizontal {
     border-bottom: none;
-  }
-
-  * {
-    margin: 0 8px;
   }
 }
 
